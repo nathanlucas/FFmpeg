@@ -1103,6 +1103,11 @@ typedef struct AVStreamGroupTREF {
     unsigned int metadata_index;
 } AVStreamGroupTREF;
 
+typedef struct AVStreamGroupLayeredVideo {
+    const AVClass *av_class;
+    unsigned int el_index;
+} AVStreamGroupLayeredVideo;
+
 enum AVStreamGroupParamsType {
     AV_STREAM_GROUP_PARAMS_NONE,
     AV_STREAM_GROUP_PARAMS_IAMF_AUDIO_ELEMENT,
@@ -1110,6 +1115,7 @@ enum AVStreamGroupParamsType {
     AV_STREAM_GROUP_PARAMS_TILE_GRID,
     AV_STREAM_GROUP_PARAMS_LCEVC,
     AV_STREAM_GROUP_PARAMS_TREF,
+    AV_STREAM_GROUP_PARAMS_LAYERED_VIDEO,
 };
 
 struct AVIAMFAudioElement;
@@ -1153,6 +1159,7 @@ typedef struct AVStreamGroup {
         struct AVStreamGroupTileGrid *tile_grid;
         struct AVStreamGroupLCEVC *lcevc;
         struct AVStreamGroupTREF *tref;
+        struct AVStreamGroupLayeredVideo *layered_video;
     } params;
 
     /**
