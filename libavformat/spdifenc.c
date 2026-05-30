@@ -81,6 +81,7 @@ typedef struct IEC61937Context {
 
     uint16_t truehd_prev_time;      ///< input_timing from the last frame
     int truehd_prev_size;           ///< previous frame size in bytes, including any MAT codes
+    int truehd_prev_padding;        ///< previous sane padding amount in bytes
     int truehd_samples_per_frame;   ///< samples per frame for padding calculation
 
     /* AVOptions: */
@@ -474,10 +475,18 @@ static int spdif_header_truehd(AVFormatContext *s, AVPacket *pkt)
                delta_samples, delta_bytes);
 
         /* sanity check */
-        if (padding_remaining < 0 || padding_remaining >= MAT_FRAME_SIZE / 2) {
-            avpriv_request_sample(s, "Unusual frame timing: %"PRIu16" => %"PRIu16", %d samples/frame",
-                                  ctx->truehd_prev_time, input_timing, ctx->truehd_samples_per_frame);
+        if (padding_remaining < 0) {
+            avpriv_request_sample(s, "Unusual frame timing: %"PRIu16" => %"PRIu16", %d samples/frame, padding %d, previous padding %d",
+                                  ctx->truehd_prev_time, input_timing, ctx->truehd_samples_per_frame,
+                                  padding_remaining, ctx->truehd_prev_padding);
             padding_remaining = 0;
+        } else if (padding_remaining >= MAT_FRAME_SIZE / 2) {
+            avpriv_request_sample(s, "Unusual frame timing: %"PRIu16" => %"PRIu16", %d samples/frame, padding %d, previous padding %d",
+                                  ctx->truehd_prev_time, input_timing, ctx->truehd_samples_per_frame,
+                                  padding_remaining, ctx->truehd_prev_padding);
+            padding_remaining = ctx->truehd_prev_padding;
+        } else {
+            ctx->truehd_prev_padding = padding_remaining;
         }
     }
 
